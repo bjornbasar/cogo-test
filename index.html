@@ -1,22 +1,118 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
-    </head>
-    <body>
-        <div>
-            <input type="text" name="guess" id="inputText" />
-        </div>
-        <div id="results">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Battleship Game</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            display: flex;
+            height: 100vh;
+        }
 
-        </div>
-    </body>
+        .left-quarter {
+            flex: 1;
+            background-color: #f0f0f0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .right-three-quarters {
+            flex: 3;
+            background-color: #ffffff;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        input {
+            width: calc(100% - 16px);
+            padding: 8px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+
+        .result {
+            font-weight: bold;
+            max-height: calc(100% - 20px);
+            overflow-y: auto;
+        }
+
+        .hit {
+            color: green;
+        }
+
+        .warm, .warn {
+            color: orange;
+        }
+
+        .cold, .error {
+            color: red;
+        }
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            const ships = [
+                [Math.floor(Math.random() * 8 + 1), Math.floor(Math.random() * 8 + 1)],
+                [Math.floor(Math.random() * 8 + 1), Math.floor(Math.random() * 8 + 1)],
+            ];
+
+            while (ships[0] === ships[1]) {
+                ships[1] = [Math.floor(Math.random() * 8 + 1), Math.floor(Math.random() * 8 + 1)];
+            }
+
+            let retries = 20;
+
+            $('#inputText').change(function(event) {
+                const [x, y] = event.target.value.split(',');
+                let shipIndex = -1, temp = 'cold';
+
+                if ((x*1 > 8) || (x*1 < 1) || (y*1 > 8) || (y*1 < 1) || (x == undefined) || (y == undefined) || (typeof x === 'string') || (typeof y === 'string')) {
+                    $('#results').prepend('<span class="warn"><p>Coordinates must be integers</p></span>');
+                    return;
+                }
+
+                if (retries == 0) {
+                    $('#results').prepend('<span class="error"><p>Sorry, no more retries left...</p></span>');
+                    return;
+                }
+                ships.forEach(function (ship, index) {
+                    const [shipX, shipY] = ship;
+                    console.log([shipX, shipY], [x, y]);
+                    const checkX = (Math.abs(shipX - x));
+                    const checkY = (Math.abs(shipY - y));
+                    if ((shipX == x) && (shipY == y)) {
+                        shipIndex = index;
+                    } else if ((checkX <= 3) && (checkY <= 3) && ((checkX + checkY) <= 3)) {
+                        temp = 'warm';
+                    } 
+                });
+                if (shipIndex >= 0) {
+                    delete ships[shipIndex];
+                    $('#results').prepend('<span class="hit"><p>' + x + ',' + y + '&nbsp;HIT!</p></span>');
+                } else {
+                    $('#results').prepend('<span class="' + temp + '"><p>' + x + ',' + y + '&nbsp;' + temp + '</p></span>');
+                }
+                retries--;
+            });
+        });
+    </script>
+</head>
+<body>
+
+    <div class="left-quarter">
+        <p>Enter a coordinate to attempt to hit the ships in an 8x8 board</p>
+        <input type="text" placeholder="Example: 8,8" id="inputText">
+    </div>
+    
+    <div class="right-three-quarters">
+        <div class="result" id="results"></div>
+    </div>
+      
+</body>
 </html>
-
-<script>
-$(document).ready(function() {
-    $('#inputText').change(function(event) {
-        console.log(event);
-    });
-});
-</script>
